@@ -1,0 +1,34 @@
+version: "3.7"
+services:
+  mysql:
+    image: mysql:8.0
+    environment:
+    - MYSQL_ROOT_PASSWORD=root1234
+    - MYSQL_DATABASE=shop
+    - MYSQL_USER=shop
+    - MYSQL_PASSWORD=shopDemo!
+    volumes:
+    - ./db:/var/lib/mysql
+  shopapp:
+    build:
+      context: .
+      target: dev
+    volumes:
+    - .:/app:rw,delegated
+    ports:
+    - 8181:8080
+    environment:
+    - DB_HOST=mysql
+    - DB_USER=shop
+    - DB_PASS=shopDemo!
+    - DB_NAME=shop
+    - DB_PORT=3306
+  pma:
+    image: phpmyadmin/phpmyadmin:5
+    environment:
+      - PMA_HOST=mysql
+      - PMA_PASSWORD=shopDemo!
+      - MYSQL_DATABASE=shop
+      - PMA_USER=shop
+    ports:
+    - 8282:80

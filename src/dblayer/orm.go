@@ -124,7 +124,7 @@ func (db *DBORM) AddOrder(order models.Order) error {
 	return db.Create(&order).Error
 }
 
-func (db *DBORM) GetCreditCardCID(id int) (string, error) {
+func (db *DBORM) GetCreditCardCID(id uint) (string, error) {
 
 	cusomterWithCCID := struct {
 		models.Customer
@@ -134,7 +134,7 @@ func (db *DBORM) GetCreditCardCID(id int) (string, error) {
 	return cusomterWithCCID.CCID, db.First(&cusomterWithCCID, id).Error
 }
 
-func (db *DBORM) SaveCreditCardForCustomer(id int, ccid string) error {
+func (db *DBORM) SaveCreditCardForCustomer(id uint, ccid string) error {
 	result := db.Table("customers").Where("id=?", id)
 	return result.Update("cc_customerid", ccid).Error
 }

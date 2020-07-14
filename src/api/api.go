@@ -20,15 +20,6 @@ func RunAPIWithHandlers() {
 
 	r.GET("/", GetMainPage)
 
-	//post user sign in
-	r.POST("/user/signin", SignIn)
-	//post user sign out
-	r.POST("/user/:id/signout", SignOut)
-	//get user orders
-	r.GET("/user/:id/orders", GetOrders)
-	//post purchase charge
-	r.POST("/user/charge", Charge)
-
 	userGroup := r.Group("/user")
 	{
 		userGroup.POST("/:id/signout", SignOut)

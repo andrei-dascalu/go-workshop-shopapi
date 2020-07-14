@@ -4,6 +4,7 @@ import (
 	"net/http"
 	"strconv"
 
+	"github.com/andrei-dascalu/go-workshop-shopapi/src/configuration"
 	"github.com/andrei-dascalu/go-workshop-shopapi/src/dblayer"
 	"github.com/andrei-dascalu/go-workshop-shopapi/src/models"
 	"github.com/labstack/echo/v4"
@@ -21,13 +22,6 @@ func GetMainPage(c echo.Context) error {
 
 //GetProducts get
 func GetProducts(c echo.Context) error {
-	if dblayer.ShopDB == nil {
-		dbErr := dblayer.InitORM()
-
-		if dbErr != nil {
-			return dbErr
-		}
-	}
 
 	products, err := dblayer.ShopDB.GetAllProducts()
 	if err != nil {
@@ -39,13 +33,6 @@ func GetProducts(c echo.Context) error {
 
 //GetPromos promos
 func GetPromos(c echo.Context) error {
-	if dblayer.ShopDB == nil {
-		dbErr := dblayer.InitORM()
-
-		if dbErr != nil {
-			return dbErr
-		}
-	}
 
 	promos, err := dblayer.ShopDB.GetPromos()
 	if err != nil {
@@ -57,13 +44,6 @@ func GetPromos(c echo.Context) error {
 
 //AddUser error
 func AddUser(c echo.Context) error {
-	if dblayer.ShopDB == nil {
-		dbErr := dblayer.InitORM()
-
-		if dbErr != nil {
-			return dbErr
-		}
-	}
 
 	var customer models.Customer
 	err := c.Bind(&customer)
@@ -80,13 +60,7 @@ func AddUser(c echo.Context) error {
 
 //SignIn signin
 func SignIn(c echo.Context) error {
-	if dblayer.ShopDB == nil {
-		dbErr := dblayer.InitORM()
 
-		if dbErr != nil {
-			return dbErr
-		}
-	}
 	var customer models.Customer
 	err := c.Bind(&customer)
 	if err != nil {
@@ -106,13 +80,7 @@ func SignIn(c echo.Context) error {
 
 //SignOut signout
 func SignOut(c echo.Context) error {
-	if dblayer.ShopDB == nil {
-		dbErr := dblayer.InitORM()
 
-		if dbErr != nil {
-			return dbErr
-		}
-	}
 	p := c.Param("id")
 	id, err := strconv.Atoi(p)
 
@@ -132,13 +100,6 @@ func SignOut(c echo.Context) error {
 
 //GetOrders get orders
 func GetOrders(c echo.Context) error {
-	if dblayer.ShopDB == nil {
-		dbErr := dblayer.InitORM()
-
-		if dbErr != nil {
-			return dbErr
-		}
-	}
 
 	p := c.Param("id")
 	id, err := strconv.Atoi(p)
@@ -157,13 +118,7 @@ func GetOrders(c echo.Context) error {
 
 //Charge charge
 func Charge(c echo.Context) error {
-	if dblayer.ShopDB == nil {
-		dbErr := dblayer.InitORM()
 
-		if dbErr != nil {
-			return dbErr
-		}
-	}
 	request := struct {
 		models.Order
 		Remember    bool   `json:"rememberCard"`
@@ -175,10 +130,8 @@ func Charge(c echo.Context) error {
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, request)
 	}
-	// Set your secret key: remember to change this to your live secret key in production
-	// Keys can be obtained from: https://dashboard.stripe.com/account/apikeys
-	// They key below is just for testing
-	stripe.Key = "sk_test_4eC39HqLyjWDarjtT1zdp7dc"
+
+	stripe.Key = configuration.Config.StripeSecretKey
 	//test cards available at:	https://stripe.com/docs/testing#cards
 	//setting charge parameters
 	chargeP := &stripe.ChargeParams{

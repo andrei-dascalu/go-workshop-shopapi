@@ -6,6 +6,7 @@ import (
 	"github.com/jinzhu/gorm"
 )
 
+//Product product data
 type Product struct {
 	gorm.Model
 	Image       string  `json:"img"`
@@ -21,6 +22,7 @@ func (Product) TableName() string {
 	return "products"
 }
 
+//Customer customer data
 type Customer struct {
 	gorm.Model
 	Name      string  `json:"name" sql:"-"`
@@ -36,16 +38,30 @@ func (Customer) TableName() string {
 	return "customers"
 }
 
+//Order order data
 type Order struct {
 	gorm.Model
-	Product
-	Customer
-	CustomerID   int       `json:"customer_id" gorm:"column:customer_id"`
-	ProductID    int       `json:"product_id" gorm:"column:product_id"`
+	Product      Product
+	Customer     Customer
+	CustomerID   uint      `json:"customer_id" gorm:"column:customer_id"`
+	ProductID    uint      `json:"product_id" gorm:"column:product_id"`
 	Price        float64   `gorm:"column:price" json:"sell_price"`
 	PurchaseDate time.Time `gorm:"column:purchase_date" json:"purchase_date"`
+	PaymentID    uint      `json:"payment_id" gorm:"column:payment_id"`
 }
 
 func (Order) TableName() string {
 	return "orders"
+}
+
+//Payment payment data
+type Payment struct {
+	gorm.Model
+	Order    Order
+	Status   string `gorm:"column:status;type:varchar(128)"`
+	StripeID string `gorm:"column:stripe_id;type:varchar(250)"`
+}
+
+func (Payment) TableName() string {
+	return "payments"
 }
