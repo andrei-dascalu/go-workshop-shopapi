@@ -1,1 +1,6 @@
-# go-workshop-shopapi
+# go-workshop-shopapi #
+
+
+## Requirements ##
+
+* Stripe API Key
