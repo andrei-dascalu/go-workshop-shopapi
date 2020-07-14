@@ -3,6 +3,9 @@ package api
 import (
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
+	"github.com/swaggo/echo-swagger"
+
+	_ "github.com/andrei-dascalu/go-workshop-shopapi/docs"
 )
 
 //RunAPIWithHandlers start  API
@@ -19,6 +22,8 @@ func RunAPIWithHandlers() {
 	r.GET("/promos", GetPromos)
 
 	r.GET("/", GetMainPage)
+
+	r.GET("/swagger/*", echoSwagger.WrapHandler)
 
 	userGroup := r.Group("/user")
 	{

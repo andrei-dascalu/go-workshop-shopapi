@@ -1,0 +1,14 @@
+{
+    "swagger": "2.0",
+    "info": {
+        "title": "Webshop API Workshop",
+        "contact": {
+            "name": "Andrei",
+            "email": "andrei.dascalu@qubiz.com"
+        },
+        "license": {}
+    },
+    "host": "localhost:8181",
+    "basePath": "/",
+    "paths": {}
+}

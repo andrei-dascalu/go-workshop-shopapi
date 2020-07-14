@@ -1,0 +1,10 @@
+basePath: /
+host: localhost:8181
+info:
+  contact:
+    email: andrei.dascalu@qubiz.com
+    name: Andrei
+  license: {}
+  title: Webshop API Workshop
+paths: {}
+swagger: "2.0"
