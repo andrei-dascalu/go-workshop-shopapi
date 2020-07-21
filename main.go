@@ -21,6 +21,6 @@ func main() {
 	if err != nil {
 		log.Errorf("Err: %v", err)
 	}
-	dblayer.ShopDB.DB.AutoMigrate(&models.Order{}, &models.Payment{}, &models.Product{}, &models.Customer{})
+	dblayer.ShopDB.DB.AutoMigrate(&models.Order{}, &models.Payment{}, &models.Address{}, &models.Cart{}, &models.Product{}, &models.Customer{})
 	api.RunAPIWithHandlers()
 }

@@ -3,8 +3,9 @@ package api
 import (
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
-	"github.com/swaggo/echo-swagger"
+	echoSwagger "github.com/swaggo/echo-swagger"
 
+	//docs folder
 	_ "github.com/andrei-dascalu/go-workshop-shopapi/docs"
 )
 
@@ -14,7 +15,7 @@ func RunAPIWithHandlers() {
 	r := echo.New()
 
 	r.Use(middleware.Logger())
-	//r.Use(middleware.Recover())
+	r.Use(middleware.Recover())
 
 	//get products
 	r.GET("/products", GetProducts)
@@ -29,6 +30,7 @@ func RunAPIWithHandlers() {
 	{
 		userGroup.POST("/:id/signout", SignOut)
 		userGroup.GET("/:id/orders", GetOrders)
+		userGroup.POST("/:id/createOrder", CreateOrder)
 	}
 
 	usersGroup := r.Group("/users")
