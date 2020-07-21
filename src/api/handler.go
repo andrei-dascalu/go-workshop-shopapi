@@ -8,6 +8,7 @@ import (
 	"github.com/andrei-dascalu/go-workshop-shopapi/src/configuration"
 	"github.com/andrei-dascalu/go-workshop-shopapi/src/dblayer"
 	"github.com/andrei-dascalu/go-workshop-shopapi/src/models"
+	"github.com/andrei-dascalu/go-workshop-shopapi/src/security"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/gommon/log"
 	"github.com/stripe/stripe-go"
@@ -66,7 +67,6 @@ func AddUser(c echo.Context) error {
 
 //SignIn signin
 func SignIn(c echo.Context) error {
-
 	var customer models.Customer
 	err := c.Bind(&customer)
 
@@ -86,14 +86,23 @@ func SignIn(c echo.Context) error {
 		})
 	}
 
-	customer.Password = ""
+	token, err := security.CreateJWTForUser(customer)
 
-	return c.JSON(http.StatusOK, customer)
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, map[string]string{
+			"error": err.Error(),
+		})
+	}
+
+	response := models.LoginResponse{
+		Token: token,
+	}
+
+	return c.JSON(http.StatusOK, response)
 }
 
 //SignOut signout
 func SignOut(c echo.Context) error {
-
 	p := c.Param("id")
 	id, err := strconv.Atoi(p)
 
