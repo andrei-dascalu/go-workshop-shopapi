@@ -3,6 +3,8 @@ package dblayer
 import (
 	"github.com/andrei-dascalu/go-workshop-shopapi/src/configuration"
 	"github.com/andrei-dascalu/go-workshop-shopapi/src/models"
+
+	//import driver
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/jinzhu/gorm"
 	"golang.org/x/crypto/bcrypt"
@@ -30,23 +32,28 @@ func InitORM() error {
 	return nil
 }
 
+//GetAllProducts get all products
 func (db *DBORM) GetAllProducts() (products []models.Product, err error) {
 	return products, db.Find(&products).Error
 }
 
+//GetPromos get promos
 func (db *DBORM) GetPromos() (products []models.Product, err error) {
 	return products, db.Where("promotion IS NOT NULL").Find(&products).Error
 
 }
 
+//GetCustomerByName get customer by name
 func (db *DBORM) GetCustomerByName(firstname string, lastname string) (customer models.Customer, err error) {
 	return customer, db.Where(&models.Customer{FirstName: firstname, LastName: lastname}).Find(&customer).Error
 }
 
+//GetCustomerByID customer by id
 func (db *DBORM) GetCustomerByID(id int) (customer models.Customer, err error) {
 	return customer, db.First(&customer, id).Error
 }
 
+//GetProduct product
 func (db *DBORM) GetProduct(id int) (product models.Product, error error) {
 	return product, db.First(&product, id).Error
 }
