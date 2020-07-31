@@ -18,7 +18,7 @@ func CreateJWTForUser(c models.Customer) (string, error) {
 	privateKey, err := jwt.ParseRSAPrivateKeyFromPEMWithPassword(ReadPrivateKey(), "testing")
 
 	if err != nil {
-		log.Error("Error occured")
+		log.Error("RSA Key Parse Error")
 
 		return "", &echo.HTTPError{
 			Code:    http.StatusExpectationFailed,
@@ -36,7 +36,7 @@ func CreateJWTForUser(c models.Customer) (string, error) {
 	t, err := token.SignedString(privateKey)
 
 	if err != nil {
-		log.Error("Error occured")
+		log.Error("Failed to sign with private key")
 
 		return "", err
 	}
@@ -48,7 +48,7 @@ func verifyToken(token string) error {
 	publicKey, err := jwt.ParseRSAPublicKeyFromPEM(ReadPublicKey())
 
 	if err != nil {
-		log.Error("Error occured")
+		log.Error("Failed to Parse public key")
 
 		return err
 	}
@@ -58,7 +58,7 @@ func verifyToken(token string) error {
 	})
 
 	if err != nil {
-		log.Error("Error occured")
+		log.Error("Error parsing token")
 
 		return err
 	}
@@ -77,13 +77,7 @@ func ReadPrivateKey() []byte {
 	data, err := ioutil.ReadFile(path)
 
 	if err != nil {
-		log.Error("Error occured")
-
-		return nil
-	}
-
-	if err != nil {
-		log.Error("Error occured")
+		log.Error("Error reading private key")
 
 		return nil
 	}
@@ -98,13 +92,7 @@ func ReadPublicKey() []byte {
 	data, err := ioutil.ReadFile(path)
 
 	if err != nil {
-		log.Error("Error occured")
-
-		return nil
-	}
-
-	if err != nil {
-		log.Error("Error occured")
+		log.Error("Error reading public key")
 
 		return nil
 	}

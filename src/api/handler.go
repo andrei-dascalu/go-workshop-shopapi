@@ -122,7 +122,6 @@ func SignOut(c echo.Context) error {
 
 //GetOrders get orders
 func GetOrders(c echo.Context) error {
-
 	p := c.Param("id")
 	id, err := strconv.Atoi(p)
 	if err != nil {
