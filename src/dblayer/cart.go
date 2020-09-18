@@ -13,7 +13,7 @@ func (db *DBORM) CreateNewCart(user models.Customer) (cart models.Cart, err erro
 	cart = models.Cart{
 		Customer:       user,
 		CustomerID:     user.ID,
-		Status:         models.Order_Status_Init,
+		Status:         models.Cart_Status_Active,
 		ExpirationDate: now.Add(time.Hour * 2),
 	}
 

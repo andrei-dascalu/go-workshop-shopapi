@@ -10,9 +10,9 @@ import (
 type Cart struct {
 	gorm.Model
 	Customer       Customer
-	Status         OrderStatus `json:"cart-status" gorm:"column:cart_status"`
-	CustomerID     uint        `json:"customer_id" gorm:"column:customer_id"`
-	ExpirationDate time.Time   `json:"expiration" gorm:"column:expiration"`
+	Status         CartStatus `json:"cart-status" gorm:"column:cart_status"`
+	CustomerID     uint       `json:"customer_id" gorm:"column:customer_id"`
+	ExpirationDate time.Time  `json:"expiration" gorm:"column:expiration"`
 }
 
 //TableName table name for Customer

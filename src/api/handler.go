@@ -7,6 +7,7 @@ import (
 
 	"github.com/andrei-dascalu/go-workshop-shopapi/src/configuration"
 	"github.com/andrei-dascalu/go-workshop-shopapi/src/dblayer"
+	"github.com/andrei-dascalu/go-workshop-shopapi/src/dto"
 	"github.com/andrei-dascalu/go-workshop-shopapi/src/models"
 	"github.com/andrei-dascalu/go-workshop-shopapi/src/security"
 	"github.com/labstack/echo/v4"
@@ -25,7 +26,6 @@ func GetMainPage(c echo.Context) error {
 
 //GetProducts get
 func GetProducts(c echo.Context) error {
-
 	products, err := dblayer.ShopDB.GetAllProducts()
 	if err != nil {
 		return err
@@ -34,9 +34,21 @@ func GetProducts(c echo.Context) error {
 	return c.JSON(http.StatusOK, products)
 }
 
+func AddProductToCart(c echo.Context) error {
+	var productDto dto.AddProductDto
+
+	err := c.Bind(&productDto)
+
+	if err != nil {
+		log.Error(err)
+		return err
+	}
+
+	return c.JSON(http.StatusOK, productDto)
+}
+
 //GetPromos promos
 func GetPromos(c echo.Context) error {
-
 	promos, err := dblayer.ShopDB.GetPromos()
 	if err != nil {
 		return err
