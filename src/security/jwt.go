@@ -5,16 +5,7 @@ import (
 	"net/http"
 
 	"github.com/labstack/echo/v4"
-	"github.com/labstack/gommon/log"
 )
-
-func RandomLoggerMiddleware(next echo.HandlerFunc) echo.HandlerFunc {
-	return func(c echo.Context) error {
-		log.Warn("test")
-
-		return next(c)
-	}
-}
 
 //CustomJWTMiddleware custom JWT validation middleware
 func CustomJWTMiddleware(next echo.HandlerFunc) echo.HandlerFunc {

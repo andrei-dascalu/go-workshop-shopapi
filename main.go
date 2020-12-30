@@ -5,7 +5,7 @@ import (
 	"github.com/andrei-dascalu/go-workshop-shopapi/src/configuration"
 	"github.com/andrei-dascalu/go-workshop-shopapi/src/dblayer"
 	"github.com/andrei-dascalu/go-workshop-shopapi/src/models"
-	"github.com/labstack/gommon/log"
+	"github.com/rs/zerolog/log"
 )
 
 func main() {
@@ -13,7 +13,7 @@ func main() {
 	err := dblayer.InitORM()
 
 	if err != nil {
-		log.Errorf("Err: %v", err)
+		log.Error().Err(err).Msg("Error")
 	}
 	dblayer.ShopDB.DB.AutoMigrate(&models.Order{}, &models.Payment{}, &models.Address{}, &models.Cart{}, &models.Product{}, &models.Customer{})
 	api.RunAPIWithHandlers()

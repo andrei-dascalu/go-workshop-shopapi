@@ -4,8 +4,6 @@ import (
 	"fmt"
 	"os"
 	"strconv"
-
-	"github.com/labstack/gommon/log"
 )
 
 var Config *Configuration
@@ -35,7 +33,6 @@ func InitConfiguration() {
 
 //GetConnectionString get connection string
 func (c *Configuration) GetConnectionString() string {
-	log.Error("test")
 	if c == nil || c.DBHost == "" || c.DBName == "" {
 		InitConfiguration()
 	}

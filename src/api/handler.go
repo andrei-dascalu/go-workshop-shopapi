@@ -11,8 +11,7 @@ import (
 	"github.com/andrei-dascalu/go-workshop-shopapi/src/models"
 	"github.com/andrei-dascalu/go-workshop-shopapi/src/security"
 	"github.com/gofiber/fiber/v2"
-	"github.com/labstack/echo/v4"
-	"github.com/labstack/gommon/log"
+	"github.com/rs/zerolog/log"
 	"github.com/stripe/stripe-go"
 	"github.com/stripe/stripe-go/charge"
 	"github.com/stripe/stripe-go/customer"
@@ -42,7 +41,7 @@ func AddProductToCart(c *fiber.Ctx) error {
 	err := c.BodyParser(&productDto)
 
 	if err != nil {
-		log.Error(err)
+		log.Error().Err(err).Msg("Error")
 		return err
 	}
 
@@ -85,11 +84,9 @@ func SignIn(c *fiber.Ctx) error {
 	err := c.BodyParser(&customer)
 
 	if err != nil {
-		return &echo.HTTPError{
-			Code:     http.StatusBadRequest,
-			Message:  err.Error(),
-			Internal: err,
-		}
+		return c.Status(http.StatusBadRequest).JSON(map[string]string{
+			"error": err.Error(),
+		})
 	}
 
 	customer, err = dblayer.ShopDB.SignInUser(customer.Email, customer.Password)
@@ -121,7 +118,7 @@ func SignIn(c *fiber.Ctx) error {
 
 //SignOut signout
 func SignOut(c *fiber.Ctx) error {
-	p := c.Param("id")
+	p := c.Params("id")
 	id, err := strconv.Atoi(p)
 
 	if err != nil {
@@ -140,7 +137,7 @@ func SignOut(c *fiber.Ctx) error {
 
 //GetOrders get orders
 func GetOrders(c *fiber.Ctx) error {
-	p := c.Param("id")
+	p := c.Params("id")
 	id, err := strconv.Atoi(p)
 	if err != nil {
 		return c.Status(http.StatusBadRequest).JSON(map[string]string{
@@ -164,13 +161,11 @@ func Charge(c *fiber.Ctx) error {
 		return c.Status(http.StatusBadRequest).JSON(expectedRequest)
 	}
 
-	order, err := dblayer.ShopDB.FindOrderByID(expectedRequest.OrderID)
+	_, err = dblayer.ShopDB.FindOrderByID(expectedRequest.OrderID)
 
 	if err != nil {
 		return c.Status(http.StatusUnprocessableEntity).JSON(expectedRequest)
 	}
-
-	log.Errorf("%v", order)
 
 	stripe.Key = configuration.Config.StripeSecretKey
 	//test cards available at:	https://stripe.com/docs/testing#cards
@@ -218,7 +213,7 @@ func Charge(c *fiber.Ctx) error {
 func CreateOrder(c *fiber.Ctx) error {
 	var expectedRequest models.CreateOrderRequest
 
-	p := c.Param("id")
+	p := c.Params("id", "")
 
 	userID, err := strconv.Atoi(p)
 
@@ -266,8 +261,6 @@ func CreateOrder(c *fiber.Ctx) error {
 			"error": err.Error(),
 		})
 	}
-
-	log.Error(order)
 
 	return c.Status(http.StatusOK).JSON(map[string]string{
 		"order": fmt.Sprintf("%d", order.ID),
