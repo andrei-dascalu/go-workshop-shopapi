@@ -8,12 +8,6 @@ import (
 	"github.com/labstack/gommon/log"
 )
 
-// @title Webshop API Workshop
-// @contact.email andrei.dascalu@qubiz.com
-// @contact.name Andrei
-// @host localhost:8181
-// @BasePath /
-
 func main() {
 	configuration.InitConfiguration()
 	err := dblayer.InitORM()

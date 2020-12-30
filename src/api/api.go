@@ -1,45 +1,47 @@
 package api
 
 import (
-	"github.com/labstack/echo/v4"
-	"github.com/labstack/echo/v4/middleware"
-	echoSwagger "github.com/swaggo/echo-swagger"
+	"github.com/prometheus/client_golang/prometheus/promhttp"
 
 	//docs folder
 	_ "github.com/andrei-dascalu/go-workshop-shopapi/docs"
+	"github.com/andrei-dascalu/go-workshop-shopapi/src/security"
+
+	"github.com/gofiber/adaptor/v2"
+	"github.com/gofiber/fiber/v2"
 )
 
 //RunAPIWithHandlers start  API
 func RunAPIWithHandlers() {
 	//default echo router
-	r := echo.New()
+	router := fiber.New(fiber.Config{
+		DisableStartupMessage: true,
+	})
 
-	r.Use(middleware.Logger())
-	r.Use(middleware.Recover())
+	router.Get("/metrics", adaptor.HTTPHandler(promhttp.Handler()))
 
 	//get products
-	r.GET("/products", GetProducts)
+	router.Get("/products", GetProducts)
 	//get promos
-	r.GET("/promos", GetPromos)
+	router.Get("/promos", GetPromos)
 
-	r.GET("/", GetMainPage)
+	router.Get("/", GetMainPage)
 
-	r.GET("/swagger/*", echoSwagger.WrapHandler)
-
-	userGroup := r.Group("/user")
+	usersGroup := router.Group("/users")
 	{
-		userGroup.POST("/:id/signout", SignOut)
-		userGroup.POST("/:id/addProduct", AddProductToCart)
-		userGroup.GET("/:id/orders", GetOrders)
-		userGroup.POST("/:id/createOrder", CreateOrder)
+		usersGroup.Post("/charge", Charge)
+		usersGroup.Post("/signin", SignIn)
+		usersGroup.Post("", AddUser)
 	}
 
-	usersGroup := r.Group("/users")
+	userGroup := router.Group("/user")
 	{
-		usersGroup.POST("/charge", Charge)
-		usersGroup.POST("/signin", SignIn)
-		usersGroup.POST("", AddUser)
+		userGroup.Use(security.CustomJWTMiddleware)
+		userGroup.Post("/:id/signout", SignOut)
+		userGroup.Post("/:id/addProduct", AddProductToCart)
+		userGroup.Post("/:id/orders", GetOrders)
+		userGroup.Post("/:id/createOrder", CreateOrder)
 	}
 
-	r.Logger.Fatal(r.Start(":8080"))
+	router.Listen(":8080")
 }

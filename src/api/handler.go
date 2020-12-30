@@ -10,6 +10,7 @@ import (
 	"github.com/andrei-dascalu/go-workshop-shopapi/src/dto"
 	"github.com/andrei-dascalu/go-workshop-shopapi/src/models"
 	"github.com/andrei-dascalu/go-workshop-shopapi/src/security"
+	"github.com/gofiber/fiber/v2"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/gommon/log"
 	"github.com/stripe/stripe-go"
@@ -18,50 +19,51 @@ import (
 )
 
 //GetMainPage get page
-func GetMainPage(c echo.Context) error {
-	return c.JSON(http.StatusOK, map[string]string{
+func GetMainPage(c *fiber.Ctx) error {
+	return c.Status(http.StatusOK).JSON(map[string]string{
 		"message": "Main Page",
 	})
 }
 
 //GetProducts get
-func GetProducts(c echo.Context) error {
+func GetProducts(c *fiber.Ctx) error {
 	products, err := dblayer.ShopDB.GetAllProducts()
 	if err != nil {
 		return err
 	}
 
-	return c.JSON(http.StatusOK, products)
+	return c.Status(http.StatusOK).JSON(products)
 }
 
-func AddProductToCart(c echo.Context) error {
+//AddProductToCart add prod
+func AddProductToCart(c *fiber.Ctx) error {
 	var productDto dto.AddProductDto
 
-	err := c.Bind(&productDto)
+	err := c.BodyParser(&productDto)
 
 	if err != nil {
 		log.Error(err)
 		return err
 	}
 
-	return c.JSON(http.StatusOK, productDto)
+	return c.Status(http.StatusOK).JSON(productDto)
 }
 
 //GetPromos promos
-func GetPromos(c echo.Context) error {
+func GetPromos(c *fiber.Ctx) error {
 	promos, err := dblayer.ShopDB.GetPromos()
 	if err != nil {
 		return err
 	}
 
-	return c.JSON(http.StatusOK, promos)
+	return c.Status(http.StatusOK).JSON(promos)
 }
 
 //AddUser error
-func AddUser(c echo.Context) error {
+func AddUser(c *fiber.Ctx) error {
 	var customer models.Customer
 
-	err := c.Bind(&customer)
+	err := c.BodyParser(&customer)
 	if err != nil {
 		return err
 	}
@@ -74,26 +76,30 @@ func AddUser(c echo.Context) error {
 		return err
 	}
 
-	return c.JSON(http.StatusOK, customer)
+	return c.Status(http.StatusOK).JSON(customer)
 }
 
 //SignIn signin
-func SignIn(c echo.Context) error {
+func SignIn(c *fiber.Ctx) error {
 	var customer models.Customer
-	err := c.Bind(&customer)
+	err := c.BodyParser(&customer)
 
 	if err != nil {
-		return err
+		return &echo.HTTPError{
+			Code:     http.StatusBadRequest,
+			Message:  err.Error(),
+			Internal: err,
+		}
 	}
 
 	customer, err = dblayer.ShopDB.SignInUser(customer.Email, customer.Password)
 	if err != nil {
 		if err == dblayer.ErrINVALIDPASSWORD {
-			return c.JSON(http.StatusForbidden, map[string]string{
+			return c.Status(http.StatusForbidden).JSON(map[string]string{
 				"error": err.Error(),
 			})
 		}
-		return c.JSON(http.StatusBadRequest, map[string]string{
+		return c.Status(http.StatusBadRequest).JSON(map[string]string{
 			"error": "Unknown user",
 		})
 	}
@@ -101,7 +107,7 @@ func SignIn(c echo.Context) error {
 	token, err := security.CreateJWTForUser(customer)
 
 	if err != nil {
-		return c.JSON(http.StatusInternalServerError, map[string]string{
+		return c.Status(http.StatusInternalServerError).JSON(map[string]string{
 			"error": err.Error(),
 		})
 	}
@@ -110,16 +116,16 @@ func SignIn(c echo.Context) error {
 		Token: token,
 	}
 
-	return c.JSON(http.StatusOK, response)
+	return c.Status(http.StatusOK).JSON(response)
 }
 
 //SignOut signout
-func SignOut(c echo.Context) error {
+func SignOut(c *fiber.Ctx) error {
 	p := c.Param("id")
 	id, err := strconv.Atoi(p)
 
 	if err != nil {
-		return c.JSON(http.StatusBadRequest, map[string]string{
+		return c.Status(http.StatusBadRequest).JSON(map[string]string{
 			"error": err.Error(),
 		})
 	}
@@ -133,11 +139,11 @@ func SignOut(c echo.Context) error {
 }
 
 //GetOrders get orders
-func GetOrders(c echo.Context) error {
+func GetOrders(c *fiber.Ctx) error {
 	p := c.Param("id")
 	id, err := strconv.Atoi(p)
 	if err != nil {
-		return c.JSON(http.StatusBadRequest, map[string]string{
+		return c.Status(http.StatusBadRequest).JSON(map[string]string{
 			"error": err.Error(),
 		})
 	}
@@ -146,23 +152,22 @@ func GetOrders(c echo.Context) error {
 		return err
 	}
 
-	return c.JSON(http.StatusOK, orders)
+	return c.Status(http.StatusOK).JSON(orders)
 }
 
 //Charge charge
-func Charge(c echo.Context) error {
-
+func Charge(c *fiber.Ctx) error {
 	var expectedRequest models.ChargeRequest
 
-	err := c.Bind(&expectedRequest)
+	err := c.BodyParser(&expectedRequest)
 	if err != nil {
-		return c.JSON(http.StatusBadRequest, expectedRequest)
+		return c.Status(http.StatusBadRequest).JSON(expectedRequest)
 	}
 
 	order, err := dblayer.ShopDB.FindOrderByID(expectedRequest.OrderID)
 
 	if err != nil {
-		return c.JSON(http.StatusUnprocessableEntity, expectedRequest)
+		return c.Status(http.StatusUnprocessableEntity).JSON(expectedRequest)
 	}
 
 	log.Errorf("%v", order)
@@ -209,7 +214,8 @@ func Charge(c echo.Context) error {
 	return nil
 }
 
-func CreateOrder(c echo.Context) error {
+//CreateOrder create order
+func CreateOrder(c *fiber.Ctx) error {
 	var expectedRequest models.CreateOrderRequest
 
 	p := c.Param("id")
@@ -217,14 +223,14 @@ func CreateOrder(c echo.Context) error {
 	userID, err := strconv.Atoi(p)
 
 	if err != nil {
-		return c.JSON(http.StatusBadRequest, map[string]string{
+		return c.Status(http.StatusBadRequest).JSON(map[string]string{
 			"error": err.Error(),
 		})
 	}
 
-	err = c.Bind(&expectedRequest)
+	err = c.BodyParser(&expectedRequest)
 	if err != nil {
-		return c.JSON(http.StatusBadRequest, map[string]string{
+		return c.Status(http.StatusBadRequest).JSON(map[string]string{
 			"error": err.Error(),
 		})
 	}
@@ -232,7 +238,7 @@ func CreateOrder(c echo.Context) error {
 	customer, err := dblayer.ShopDB.GetCustomerByID(userID)
 
 	if err != nil {
-		return c.JSON(http.StatusBadRequest, map[string]string{
+		return c.Status(http.StatusBadRequest).JSON(map[string]string{
 			"error": err.Error(),
 		})
 	}
@@ -240,7 +246,7 @@ func CreateOrder(c echo.Context) error {
 	cart, err := dblayer.ShopDB.GetActiveCartForUser(customer)
 
 	if err != nil {
-		return c.JSON(http.StatusBadRequest, map[string]string{
+		return c.Status(http.StatusBadRequest).JSON(map[string]string{
 			"error": err.Error(),
 		})
 	}
@@ -248,7 +254,7 @@ func CreateOrder(c echo.Context) error {
 	address, err := dblayer.ShopDB.GetMainAddressForCustomer(customer)
 
 	if err != nil {
-		return c.JSON(http.StatusBadRequest, map[string]string{
+		return c.Status(http.StatusBadRequest).JSON(map[string]string{
 			"error": err.Error(),
 		})
 	}
@@ -256,14 +262,14 @@ func CreateOrder(c echo.Context) error {
 	order, err := dblayer.ShopDB.CreateOrder(cart, address)
 
 	if err != nil {
-		return c.JSON(http.StatusBadRequest, map[string]string{
+		return c.Status(http.StatusBadRequest).JSON(map[string]string{
 			"error": err.Error(),
 		})
 	}
 
 	log.Error(order)
 
-	return c.JSON(http.StatusOK, map[string]string{
+	return c.Status(http.StatusOK).JSON(map[string]string{
 		"order": fmt.Sprintf("%d", order.ID),
 	})
 }
